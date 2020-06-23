@@ -1,0 +1,7 @@
+apiVersion: tmax.io/v1
+kind: Approval
+metadata:
+  name: example-approval
+spec:
+  # Add fields here
+  size: 3
