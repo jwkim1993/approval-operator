@@ -98,7 +98,7 @@ func main() {
 	options := manager.Options{
 		Namespace:          namespace,
 		MetricsBindAddress: fmt.Sprintf("%s:%d", metricsHost, metricsPort),
-		Port:               approvalWebhook.Port,
+		Port:               approvalWebhook.Port(),
 		CertDir:            approvalWebhook.CertDir,
 	}
 
@@ -135,13 +135,9 @@ func main() {
 	// Setup webhooks
 	log.Info("Setting up webhook servers")
 	webHookServer := mgr.GetWebhookServer()
-	if err := mgr.Add(webHookServer); err != nil {
-		log.Error(err, "Cannot register webhook server with manager")
-		os.Exit(1)
-	}
 
 	log.Info("Registering webhooks to the webhook server")
-	webHookServer.Register("/validate-approvals", &webhook.Admission{Handler: &approvalWebhook.Validator{}})
+	webHookServer.Register(approvalWebhook.ValidationPath, &webhook.Admission{Handler: &approvalWebhook.Validator{}})
 
 	// Add the Metrics Service
 	addMetrics(ctx, cfg)
