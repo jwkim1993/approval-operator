@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -15,6 +16,7 @@ import (
 
 	"approval-operator/pkg/apis"
 	"approval-operator/pkg/controller"
+	approvalWebhook "approval-operator/pkg/webhook/approval"
 	"approval-operator/version"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
@@ -96,6 +98,8 @@ func main() {
 	options := manager.Options{
 		Namespace:          namespace,
 		MetricsBindAddress: fmt.Sprintf("%s:%d", metricsHost, metricsPort),
+		Port:               approvalWebhook.Port,
+		CertDir:            approvalWebhook.CertDir,
 	}
 
 	// Add support for MultiNamespace set in WATCH_NAMESPACE (e.g ns1,ns2)
@@ -127,6 +131,17 @@ func main() {
 		log.Error(err, "")
 		os.Exit(1)
 	}
+
+	// Setup webhooks
+	log.Info("Setting up webhook servers")
+	webHookServer := mgr.GetWebhookServer()
+	if err := mgr.Add(webHookServer); err != nil {
+		log.Error(err, "Cannot register webhook server with manager")
+		os.Exit(1)
+	}
+
+	log.Info("Registering webhooks to the webhook server")
+	webHookServer.Register("/validate-approvals", &webhook.Admission{Handler: &approvalWebhook.Validator{}})
 
 	// Add the Metrics Service
 	addMetrics(ctx, cfg)
