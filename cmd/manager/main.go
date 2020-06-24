@@ -1,6 +1,7 @@
 package main
 
 import (
+	"approval-operator/internal"
 	"context"
 	"errors"
 	"flag"
@@ -133,6 +134,19 @@ func main() {
 	}
 
 	// Setup webhooks
+	// Get new client only for updating certificates
+	client, err := internal.SimpleClient()
+	if err != nil {
+		log.Error(err, "Cannot create simple client")
+		os.Exit(1)
+	}
+
+	log.Info("Creating webhook certificates")
+	if err := approvalWebhook.CreateCert(ctx, client); err != nil {
+		log.Error(err, "Cannot create cert for webhooks")
+		os.Exit(1)
+	}
+
 	log.Info("Setting up webhook servers")
 	webHookServer := mgr.GetWebhookServer()
 
