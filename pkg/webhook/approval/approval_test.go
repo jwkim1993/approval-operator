@@ -130,6 +130,9 @@ func validCertificate(cert []byte, t *testing.T) (*x509.Certificate, error) {
 	t.Helper()
 	const certificate = "CERTIFICATE"
 	caCert, _ := pem.Decode(cert)
+	if caCert == nil {
+		return nil, fmt.Errorf("failed to decode cert")
+	}
 	if caCert.Type != certificate {
 		return nil, fmt.Errorf("cert.Type = %s, want: %s", caCert.Type, certificate)
 	}
