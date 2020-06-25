@@ -5,12 +5,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
-func SimpleClient() (client.Client, error) {
+func Client(options client.Options) (client.Client, error) {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}
-	c, err := client.New(cfg, client.Options{})
+	c, err := client.New(cfg, options)
 	if err != nil {
 		return nil, err
 	}

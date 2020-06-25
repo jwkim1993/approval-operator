@@ -1,20 +1,19 @@
 package main
 
 import (
-	"approval-operator/internal"
 	"context"
 	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"runtime"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 
+	"approval-operator/internal"
 	"approval-operator/pkg/apis"
 	"approval-operator/pkg/controller"
 	approvalWebhook "approval-operator/pkg/webhook/approval"
@@ -30,10 +29,12 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
 // Change below variables to serve metrics on different host or port.
@@ -135,14 +136,14 @@ func main() {
 
 	// Setup webhooks
 	// Get new client only for updating certificates
-	client, err := internal.SimpleClient()
+	c, err := internal.Client(client.Options{})
 	if err != nil {
 		log.Error(err, "Cannot create simple client")
 		os.Exit(1)
 	}
 
 	log.Info("Creating webhook certificates")
-	if err := approvalWebhook.CreateCert(ctx, client); err != nil {
+	if err := approvalWebhook.CreateCert(ctx, c); err != nil {
 		log.Error(err, "Cannot create cert for webhooks")
 		os.Exit(1)
 	}
