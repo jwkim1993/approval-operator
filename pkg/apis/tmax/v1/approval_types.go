@@ -28,8 +28,8 @@ type Approval struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ApprovalSpec   `json:"spec"`
-	Status ApprovalStatus `json:"status"`
+	Spec   ApprovalSpec   `json:"spec,omitempty"`
+	Status ApprovalStatus `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
