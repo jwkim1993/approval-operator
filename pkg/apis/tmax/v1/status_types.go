@@ -8,14 +8,14 @@ import (
 )
 
 type ApprovalStatus struct {
-	Conditions	Conditions	`json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
-	Approvers	[]Approver	`json:"approvers,omitempty"`
-	Retry		int32		`json:"retry"`
+	Conditions Conditions `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+	Approvers  []Approver `json:"approvers,omitempty"`
+	Retry      int32      `json:"retry"`
 }
 
 type Approver struct {
-	UserID		string		`json:"userId"`
-	ApprovedTime	metav1.Time	`json:"approvedTime"`
+	UserID       string      `json:"userId"`
+	ApprovedTime metav1.Time `json:"approvedTime"`
 }
 
 func (s *ApprovalStatus) GetCondition(t string) *Condition {
@@ -36,9 +36,9 @@ func (s *ApprovalStatus) SetApprover(u string) error {
 	}
 
 	s.Approvers = append(s.Approvers, Approver{
-							UserID: u,
-							ApprovedTime: metav1.NewTime(time.Now()),
-						})
+		UserID:       u,
+		ApprovedTime: metav1.NewTime(time.Now()),
+	})
 
 	return nil
 }
