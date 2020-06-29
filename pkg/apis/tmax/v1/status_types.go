@@ -15,6 +15,7 @@ type ApprovalStatus struct {
 
 type Approver struct {
 	UserID       string      `json:"userId"`
+	Decision     string      `json:"decision"`
 	ApprovedTime metav1.Time `json:"approvedTime"`
 }
 

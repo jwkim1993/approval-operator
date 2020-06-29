@@ -33,7 +33,7 @@ spec:
           properties:
             accessPath:
               type: string
-            podName:
+            podIP:
               description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                 Important: Run "operator-sdk generate k8s" to regenerate code after
                 modifying this file Add custom validation using kubebuilder tags:
@@ -50,7 +50,7 @@ spec:
                 type: string
               type: array
           required:
-          - podName
+          - podIP
           - users
           type: object
         status:
@@ -61,10 +61,13 @@ spec:
                   approvedTime:
                     format: date-time
                     type: string
+                  decision:
+                    type: string
                   userId:
                     type: string
                 required:
                 - approvedTime
+                - decision
                 - userId
                 type: object
               type: array
