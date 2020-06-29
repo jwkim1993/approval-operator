@@ -13,8 +13,10 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 
+	"approval-operator/internal"
 	"approval-operator/pkg/apis"
 	"approval-operator/pkg/controller"
+	approvalWebhook "approval-operator/pkg/webhook/approval"
 	"approval-operator/version"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
@@ -27,10 +29,12 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
 // Change below variables to serve metrics on different host or port.
@@ -96,6 +100,8 @@ func main() {
 	options := manager.Options{
 		Namespace:          namespace,
 		MetricsBindAddress: fmt.Sprintf("%s:%d", metricsHost, metricsPort),
+		Port:               approvalWebhook.Port(),
+		CertDir:            approvalWebhook.CertDir,
 	}
 
 	// Add support for MultiNamespace set in WATCH_NAMESPACE (e.g ns1,ns2)
@@ -127,6 +133,26 @@ func main() {
 		log.Error(err, "")
 		os.Exit(1)
 	}
+
+	// Setup webhooks
+	// Get new client only for updating certificates
+	c, err := internal.Client(client.Options{})
+	if err != nil {
+		log.Error(err, "Cannot create simple client")
+		os.Exit(1)
+	}
+
+	log.Info("Creating webhook certificates")
+	if err := approvalWebhook.CreateCert(ctx, c); err != nil {
+		log.Error(err, "Cannot create cert for webhooks")
+		os.Exit(1)
+	}
+
+	log.Info("Setting up webhook servers")
+	webHookServer := mgr.GetWebhookServer()
+
+	log.Info("Registering webhooks to the webhook server")
+	webHookServer.Register(approvalWebhook.ValidationPath, &webhook.Admission{Handler: &approvalWebhook.Validator{}})
 
 	// Add the Metrics Service
 	addMetrics(ctx, cfg)
