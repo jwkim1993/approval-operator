@@ -12,7 +12,7 @@ type ApprovalSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
-	PodName    string   `json:"podName"`
+	PodIP      string   `json:"podIP"`
 	AccessPath string   `json:"accessPath,omitempty"`
 	Port       int32    `json:"port,omitempty"`
 	Threshold  int32    `json:"threshold,omitempty"`
