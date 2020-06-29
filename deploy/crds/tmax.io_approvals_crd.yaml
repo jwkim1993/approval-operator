@@ -62,6 +62,10 @@ spec:
                     format: date-time
                     type: string
                   decision:
+                    description: DecisionType field should have Approved or Rejected.
+                    enum:
+                    - Approved
+                    - Rejected
                     type: string
                   userId:
                     type: string
@@ -102,10 +106,9 @@ spec:
                 type: object
               type: array
             retry:
+              default: 0
               format: int32
               type: integer
-          required:
-          - retry
           type: object
       type: object
   version: v1
