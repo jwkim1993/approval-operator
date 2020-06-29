@@ -30,9 +30,79 @@ spec:
           type: object
         spec:
           description: ApprovalSpec defines the desired state of Approval
+          properties:
+            accessPath:
+              type: string
+            podName:
+              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                Important: Run "operator-sdk generate k8s" to regenerate code after
+                modifying this file Add custom validation using kubebuilder tags:
+                https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
+              type: string
+            port:
+              format: int32
+              type: integer
+            threshold:
+              format: int32
+              type: integer
+            users:
+              items:
+                type: string
+              type: array
+          required:
+          - podName
+          - users
           type: object
         status:
-          description: ApprovalStatus defines the observed state of Approval
+          properties:
+            approvers:
+              items:
+                properties:
+                  approvedTime:
+                    format: date-time
+                    type: string
+                  userId:
+                    type: string
+                required:
+                - approvedTime
+                - userId
+                type: object
+              type: array
+            conditions:
+              items:
+                description: to seperate conditions and our status. conditions will
+                  be replaced by knative.conditions
+                properties:
+                  lastTransitionTime:
+                    description: LastTransitionTime is the last time the condition
+                      transitioned from one status to another. We use VolatileTime
+                      in place of metav1.Time to exclude this from creating equality.Semantic
+                      differences (all other things held constant).
+                    format: date-time
+                    type: string
+                  message:
+                    description: A human readable message indicating details about
+                      the transition.
+                    type: string
+                  reason:
+                    description: The reason for the condition's last transition.
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown.
+                    type: string
+                  type:
+                    description: Type of condition.
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            retry:
+              format: int32
+              type: integer
+          required:
+          - retry
           type: object
       type: object
   version: v1
