@@ -10,7 +10,7 @@ webhooks:
   - clientConfig:
       service:
         name: approval-webhook
-        namespace: approval
+        namespace: hypercloud4-system
     failurePolicy: Fail
     sideEffects: None
     name: validating.approval.tmax.io
