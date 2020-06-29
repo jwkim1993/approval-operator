@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: approval-operator
+  namespace: hypercloud4-system
 spec:
   replicas: 1
   selector:
@@ -15,19 +16,18 @@ spec:
       serviceAccountName: approval-operator
       containers:
         - name: approval-operator
-          # Replace this with the built image name
-          image: REPLACE_IMAGE
+          image: 172.22.11.2:30500/approval-operator:0.0.1 #TODO: Should be public repository
           command:
           - approval-operator
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+              value: ""
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "approval-operator"
+            - name: WEBHOOK_PORT
+              value: "9443"
