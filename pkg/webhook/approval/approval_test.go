@@ -5,21 +5,30 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"io/ioutil"
+	"os"
+	"path"
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	admissionRegistrationV1 "k8s.io/api/admissionregistration/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/kubectl/pkg/scheme"
-	"os"
-	"path"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"testing"
 
-	admissionRegistrationV1 "k8s.io/api/admissionregistration/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"approval-operator/internal"
 )
 
 func TestCreateCert(t *testing.T) {
+	// Get service name and namespace
+	svcName := internal.WebhookServiceName()
+	ns, err := internal.Namespace()
+	if err != nil {
+		t.Fatal(err, "error getting namespace")
+	}
+
 	// Dummy  validatingwebhookconfigurations
 	conf := &admissionRegistrationV1.ValidatingWebhookConfiguration{
 		ObjectMeta: metav1.ObjectMeta{Name: ValidationConfigName},
@@ -28,8 +37,8 @@ func TestCreateCert(t *testing.T) {
 				Name: "validating.approval.tmax.io",
 				ClientConfig: admissionRegistrationV1.WebhookClientConfig{
 					Service: &admissionRegistrationV1.ServiceReference{
-						Name:      ServiceName,
-						Namespace: Namespace,
+						Name:      svcName,
+						Namespace: ns,
 					},
 				},
 			},
@@ -106,10 +115,10 @@ func TestCreateCert(t *testing.T) {
 
 	// Verify domain names
 	expectedDNSNames := []string{
-		ServiceName,
-		ServiceName + "." + Namespace,
-		ServiceName + "." + Namespace + ".svc",
-		ServiceName + "." + Namespace + ".svc.cluster.local",
+		svcName,
+		svcName + "." + ns,
+		svcName + "." + ns + ".svc",
+		svcName + "." + ns + ".svc.cluster.local",
 	}
 	if diff := cmp.Diff(caParsedCert.DNSNames, expectedDNSNames); diff != "" {
 		t.Fatalf("Unexpected CA Cert DNS Name (-want +got) : %v", diff)

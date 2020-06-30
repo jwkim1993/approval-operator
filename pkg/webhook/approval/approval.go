@@ -14,13 +14,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	certResources "knative.dev/pkg/webhook/certificates/resources"
+
+	"approval-operator/internal"
 )
 
 const (
 	DefaultPort          = 443
 	CertDir              = "/tmp/approval-webhook"
-	Namespace            = "approval"
-	ServiceName          = "approval-webhook"
 	ValidationPath       = "/validate-approvals"
 	ValidationConfigName = "validating.approval.tmax.io"
 )
@@ -48,8 +48,15 @@ func CreateCert(ctx context.Context, client client.Client) error {
 		return err
 	}
 
+	// Get service name and namespace
+	svc := internal.WebhookServiceName()
+	ns, err := internal.Namespace()
+	if err != nil {
+		return err
+	}
+
 	// Create certs
-	tlsKey, tlsCrt, caCrt, err := certResources.CreateCerts(ctx, ServiceName, Namespace, time.Now().AddDate(1, 0, 0))
+	tlsKey, tlsCrt, caCrt, err := certResources.CreateCerts(ctx, svc, ns, time.Now().AddDate(1, 0, 0))
 	if err != nil {
 		return err
 	}
