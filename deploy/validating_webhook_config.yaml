@@ -1,4 +1,4 @@
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: validating.approval.tmax.io
@@ -7,10 +7,26 @@ metadata:
     app.kubernetes.io/instance: default
     app.kubernetes.io/part-of: approval
 webhooks:
-  - clientConfig:
+  - admissionReviewVersions:
+    - v1beta1
+    - v1
+    clientConfig:
       service:
         name: approval-webhook
         namespace: hypercloud4-system
+        port: 443
+        path: /validate-approvals
     failurePolicy: Fail
     sideEffects: None
     name: validating.approval.tmax.io
+    rules:
+    - apiGroups:
+      - tmax.io
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - approvals/*
+      scope: '*'
