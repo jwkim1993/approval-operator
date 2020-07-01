@@ -40,7 +40,7 @@ func (s *ApprovalStatus) GetCondition(t string) *Condition {
 }
 
 func (s *ApprovalStatus) SetApprover(u string, d DecisionType) {
-	for i, _ := range s.Approvers {
+	for i := range s.Approvers {
 		if s.Approvers[i].UserID == u {
 			s.Approvers[i].Decision = d
 			s.Approvers[i].ApprovedTime = metav1.NewTime(time.Now())
@@ -57,8 +57,5 @@ func (s *ApprovalStatus) SetApprover(u string, d DecisionType) {
 }
 
 func (s *ApprovalStatus) IsApproversOverThreshold(thres int) bool {
-	if len(s.Approvers) >= thres {
-		return true
-	}
-	return false
+	return len(s.Approvers) >= thres
 }
