@@ -1,6 +1,6 @@
 SDK	= operator-sdk
 
-REGISTRY      ?= tmaxcloudck/approval-operator
+REGISTRY      ?= tmaxcloudck
 VERSION       ?= 0.0.1
 
 PACKAGE_NAME  = approval-operator
