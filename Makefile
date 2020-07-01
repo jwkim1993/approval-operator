@@ -33,8 +33,6 @@ build-operator:
 	$(SDK) build $(OPERATOR_IMG)
 
 build-watcher:
-	go build -o $(BIN)/approval-watcher $(BUILD_FLAG) $(PACKAGE_NAME)/cmd/watcher
-	docker build -f build/Dockerfile.watcher -t $(WATCHER_IMG) .
 
 
 .PHONY: push push-operator push-watcher
@@ -44,7 +42,6 @@ push-operator:
 	docker push $(OPERATOR_IMG)
 
 push-watcher:
-	docker push $(WATCHER_IMG)
 
 
 .PHONY: test test-gen save-sha-gen compare-sha-gen test-verify save-sha-mod compare-sha-mod verify test-unit test-lint
