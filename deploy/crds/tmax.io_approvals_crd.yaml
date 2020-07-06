@@ -46,9 +46,9 @@ spec:
                 format: int32
                 type: integer
               users:
-                items:
+                additionalProperties:
                   type: string
-                type: array
+                type: object
             required:
             - podIP
             - users
