@@ -16,7 +16,7 @@ spec:
       serviceAccountName: approval-operator
       containers:
         - name: approval-operator
-          image: 172.22.11.2:30500/approval-operator:0.0.1 #TODO: Should be public repository
+          image: 172.22.11.2:30500/approval-operator:test #TODO: Should be public repository
           command:
           - approval-operator
           imagePullPolicy: Always

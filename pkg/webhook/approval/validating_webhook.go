@@ -60,8 +60,8 @@ func (v *Validator) Handle(_ context.Context, req admission.Request) admission.R
 		}
 
 		// If update performed after approved/rejected, reject (all fields are immutable after final decision is made)
-		approvedCond := oldApproval.Status.GetCondition(string(tmaxv1.DecisionApproved))
-		rejectedCond := oldApproval.Status.GetCondition(string(tmaxv1.DecisionRejected))
+		approvedCond := oldApproval.Status.GetCondition(tmaxv1.ConditionApproved)
+		rejectedCond := oldApproval.Status.GetCondition(tmaxv1.ConditionRejected)
 		if (approvedCond != nil && approvedCond.Status == corev1.ConditionTrue) ||
 			(rejectedCond != nil && rejectedCond.Status == corev1.ConditionTrue) {
 			errMsg := "updating after rejected/approved is forbidden"

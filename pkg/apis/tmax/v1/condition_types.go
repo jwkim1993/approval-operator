@@ -6,12 +6,20 @@ import (
 )
 
 type Conditions []Condition
+type ConditionType string
+
+const (
+	ConditionWaiting  ConditionType = "Waiting"
+	ConditionApproved ConditionType = "Approved"
+	ConditionRejected ConditionType = "Rejected"
+	ConditionFailed   ConditionType = "Failed"
+)
 
 // to seperate conditions and our status. conditions will be replaced by knative.conditions
 type Condition struct {
 	// Type of condition.
 	// +required
-	Type string `json:"type" description:"type of status condition"`
+	Type ConditionType `json:"type" description:"type of status condition"`
 
 	// Status of the condition, one of True, False, Unknown.
 	// +required

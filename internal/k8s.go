@@ -3,6 +3,7 @@ package internal
 import (
 	"errors"
 	"io/ioutil"
+	"net"
 	"os"
 )
 
@@ -23,6 +24,23 @@ func Namespace() (string, error) {
 		}
 		return ns, nil
 	}
+}
+
+// GetLocalIP returns the non loopback local IP of the host
+func LocalIP() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+	for _, address := range addrs {
+		// check the address type and if it is not a loopback the display it
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
+		}
+	}
+	return "", err
 }
 
 func WebhookServiceName() string {

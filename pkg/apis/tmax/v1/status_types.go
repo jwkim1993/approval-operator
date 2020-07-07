@@ -13,6 +13,7 @@ type DecisionType string
 const (
 	DecisionApproved DecisionType = "Approved"
 	DecisionRejected DecisionType = "Rejected"
+	DecisionUnknown  DecisionType = "Unknown"
 )
 
 type ApprovalStatus struct {
@@ -29,7 +30,7 @@ type Approver struct {
 	ApprovedTime metav1.Time  `json:"approvedTime"`
 }
 
-func (s *ApprovalStatus) GetCondition(t string) *Condition {
+func (s *ApprovalStatus) GetCondition(t ConditionType) *Condition {
 	for _, cond := range s.Conditions {
 		if cond.Type == t {
 			return &cond
