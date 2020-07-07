@@ -39,6 +39,15 @@ func (s *ApprovalStatus) GetCondition(t string) *Condition {
 	return nil
 }
 
+func (s *ApprovalStatus) GetApprover(u string) *Approver {
+	for i := range s.Approvers {
+		if s.Approvers[i].UserID == u {
+			return &s.Approvers[i]
+		}
+	}
+	return nil
+}
+
 func (s *ApprovalStatus) SetApprover(u string, d DecisionType) {
 	for i := range s.Approvers {
 		if s.Approvers[i].UserID == u {
