@@ -139,24 +139,29 @@ func authenticate(approval *tmaxv1.Approval, oldApproval *tmaxv1.Approval, userI
 		return err
 	}
 
+	// If it's operator, permit every change
+	if isOperator {
+		return nil
+	}
+
 	// Changes to status field is permitted only for operator and the users specified in spec.users
 	_, exist := approval.Spec.Users[userInfo.Username]
-	if !isOperator && !exist {
+	if !exist {
 		return fmt.Errorf("user(%s) is not requested for the approval", userInfo.Username)
 	}
 
 	// Changed 'conditions' field --> permit only if user is operator
-	if !reflect.DeepEqual(status.Conditions, oldStatus.Conditions) && !isOperator {
+	if !reflect.DeepEqual(status.Conditions, oldStatus.Conditions) {
 		return fmt.Errorf("only operator can update 'conditions' filed")
 	}
 
 	// Changed 'retry' field --> permit only if user is operator
-	if status.Retry != oldStatus.Retry && !isOperator {
+	if status.Retry != oldStatus.Retry {
 		return fmt.Errorf("only operator can update 'retry' filed")
 	}
 
-	// Changed 'approvers field' --> permit only if the user modified his/her field (if is operator, just permit)
-	if !reflect.DeepEqual(status.Approvers, oldStatus.Approvers) && !isOperator {
+	// Changed 'approvers' field --> permit only if the user modified his/her field (if is operator, just permit)
+	if !reflect.DeepEqual(status.Approvers, oldStatus.Approvers) {
 		// Find updated approver
 		changed := difference(status.Approvers, oldStatus.Approvers)
 		for _, a := range changed {
