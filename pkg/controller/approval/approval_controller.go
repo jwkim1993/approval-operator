@@ -189,7 +189,7 @@ func (r *ReconcileApproval) sendMsgToTask(cr *tmaxv1.Approval, dt tmaxv1.Decisio
 	}
 	body := bytes.NewReader(payloadBytes)
 
-	req, err := http.NewRequest("PUT", fmt.Sprint(cr.Spec.PodIP, ":", cr.Spec.Port, "/", cr.Spec.AccessPath), body)
+	req, err := http.NewRequest("PUT", fmt.Sprint("http://", cr.Spec.PodIP, ":", cr.Spec.Port, cr.Spec.AccessPath), body)
 	if err != nil {
 		return err
 	}
