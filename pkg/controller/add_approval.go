@@ -74,7 +74,7 @@ func init() {
 
 	go func() {
 		router := mux.NewRouter()
-		router.HandleFunc("/", approvalCreator).Methods("POST")
+		router.HandleFunc("/approval", approvalCreator).Methods("POST")
 
 		http.Handle("/", router)
 		err := http.ListenAndServe(fmt.Sprintf(":%d", Port), nil)
