@@ -1,6 +1,7 @@
 package approval
 
 import (
+	"bytes"
 	"context"
 	"crypto/x509"
 	"encoding/pem"
@@ -29,7 +30,7 @@ func TestCreateCert(t *testing.T) {
 		t.Fatal(err, "error getting namespace")
 	}
 
-	// Dummy  ebhookconfigurations
+	// Dummy webhookconfigurations
 	valConf := &admissionRegistrationV1.ValidatingWebhookConfiguration{
 		ObjectMeta: metav1.ObjectMeta{Name: ValidationConfigName},
 		Webhooks: []admissionRegistrationV1.ValidatingWebhook{
@@ -92,14 +93,29 @@ func TestCreateCert(t *testing.T) {
 	}
 
 	// Check if CA is saved into validatingwebhookconfigurations
-	got := &admissionRegistrationV1.ValidatingWebhookConfiguration{}
-	if err := client.Get(context.TODO(), types.NamespacedName{Name: ValidationConfigName}, got); err != nil {
+	gotValidate := &admissionRegistrationV1.ValidatingWebhookConfiguration{}
+	if err := client.Get(context.TODO(), types.NamespacedName{Name: ValidationConfigName}, gotValidate); err != nil {
 		t.Fatal(err, "Cannot get ValidatingWebhookConfiguration")
 	}
-	if len(got.Webhooks) < 1 {
+	if len(gotValidate.Webhooks) < 1 {
 		t.Fatal("Length of webhooks of retrieved ValidatingWebhookConfiguration is 0")
 	}
-	caCertBytes := got.Webhooks[0].ClientConfig.CABundle
+	caCertBytes := gotValidate.Webhooks[0].ClientConfig.CABundle
+
+	// Check if CA is saved into mutatingwebhookconfigurations
+	gotMutate := &admissionRegistrationV1.MutatingWebhookConfiguration{}
+	if err := client.Get(context.TODO(), types.NamespacedName{Name: MutationConfigName}, gotMutate); err != nil {
+		t.Fatal(err, "Cannot get MutatingWebhookConfiguration")
+	}
+	if len(gotMutate.Webhooks) < 1 {
+		t.Fatal("Length of webhooks of retrieved MutatingWebhookConfiguration is 0")
+	}
+	caCertBytesMutate := gotMutate.Webhooks[0].ClientConfig.CABundle
+
+	// Check if two caCert is equal
+	if !bytes.Equal(caCertBytes, caCertBytesMutate) {
+		t.Fatal("Two certs saved in validatingwebhookconfigurations and mutatingwebhookconfigurations are different")
+	}
 
 	// Test if certs are valid
 	// Copied from kantive.dev/pkg/webhook/certificates/resources/certs_test.go
