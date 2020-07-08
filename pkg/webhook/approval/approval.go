@@ -3,19 +3,21 @@ package approval
 import (
 	"context"
 	"io/ioutil"
-	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"path"
+	"reflect"
 	"strconv"
 	"time"
 
 	admissionRegistrationV1 "k8s.io/api/admissionregistration/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	certResources "knative.dev/pkg/webhook/certificates/resources"
 
 	"approval-operator/internal"
+	tmaxv1 "approval-operator/pkg/apis/tmax/v1"
 )
 
 const (
@@ -23,6 +25,8 @@ const (
 	CertDir              = "/tmp/approval-webhook"
 	ValidationPath       = "/validate-approvals"
 	ValidationConfigName = "validating.approval.tmax.io"
+	MutationPath         = "/mutate-approvals"
+	MutationConfigName   = "mutating.approval.tmax.io"
 )
 
 func Port() int {
@@ -75,18 +79,70 @@ func CreateCert(ctx context.Context, client client.Client) error {
 	}
 
 	// Update validatingWebhookConfigurations
-	conf := &admissionRegistrationV1.ValidatingWebhookConfiguration{}
-	if err = client.Get(ctx, types.NamespacedName{Name: ValidationConfigName}, conf); err != nil {
+	valConf := &admissionRegistrationV1.ValidatingWebhookConfiguration{}
+	if err = client.Get(ctx, types.NamespacedName{Name: ValidationConfigName}, valConf); err != nil {
 		// Return error, even if it is 'not found' error
 		// ValidationWebhookConfiguration object should be created at installation time
 		return err
 	}
-	for i := range conf.Webhooks {
-		conf.Webhooks[i].ClientConfig.CABundle = caCrt
+	for i := range valConf.Webhooks {
+		valConf.Webhooks[i].ClientConfig.CABundle = caCrt
 	}
-	if err = client.Update(ctx, conf); err != nil {
+	if err = client.Update(ctx, valConf); err != nil {
+		return err
+	}
+
+	// Update mutatingWebhookConfigurations
+	mutConf := &admissionRegistrationV1.MutatingWebhookConfiguration{}
+	if err = client.Get(ctx, types.NamespacedName{Name: MutationConfigName}, mutConf); err != nil {
+		// Return error, even if it is 'not found' error
+		// MutatingWebhookConfiguration object should be created at installation time
+		return err
+	}
+	for i := range mutConf.Webhooks {
+		mutConf.Webhooks[i].ClientConfig.CABundle = caCrt
+	}
+	if err = client.Update(ctx, mutConf); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func difference(approvers []tmaxv1.Approver, oldApprovers []tmaxv1.Approver) []tmaxv1.Approver {
+	var result []tmaxv1.Approver
+
+	// Find added
+	for _, a1 := range approvers {
+		found := false
+		for _, a2 := range oldApprovers {
+			if a1.UserID == a2.UserID {
+				found = true
+				// Check if changed
+				if !reflect.DeepEqual(a1, a2) {
+					result = append(result, a1)
+				}
+				break
+			}
+		}
+		if !found {
+			result = append(result, a1)
+		}
+	}
+
+	// Find deleted
+	for _, a2 := range oldApprovers {
+		found := false
+		for _, a1 := range approvers {
+			if a2.UserID == a1.UserID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			result = append(result, a2)
+		}
+	}
+
+	return result
 }

@@ -70,8 +70,10 @@ rules:
   - admissionregistration.k8s.io
   resources:
   - validatingwebhookconfigurations
+  - mutatingwebhookconfigurations
   resourceNames:
   - validating.approval.tmax.io
+  - mutating.approval.tmax.io
   verbs:
   - get
   - update

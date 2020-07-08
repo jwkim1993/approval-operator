@@ -153,6 +153,7 @@ func main() {
 
 	log.Info("Registering webhooks to the webhook server")
 	webHookServer.Register(approvalWebhook.ValidationPath, &webhook.Admission{Handler: &approvalWebhook.Validator{}})
+	webHookServer.Register(approvalWebhook.MutationPath, &webhook.Admission{Handler: &approvalWebhook.Mutator{}})
 
 	// Add the Metrics Service
 	addMetrics(ctx, cfg)

@@ -27,7 +27,7 @@ type ApprovalStatus struct {
 type Approver struct {
 	UserID       string       `json:"userId"`
 	Decision     DecisionType `json:"decision"`
-	ApprovedTime metav1.Time  `json:"approvedTime"`
+	ApprovedTime metav1.Time  `json:"approvedTime,omitempty"`
 }
 
 func (s *ApprovalStatus) GetCondition(t ConditionType) *Condition {

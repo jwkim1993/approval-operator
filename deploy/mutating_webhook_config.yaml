@@ -1,0 +1,32 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mutating.approval.tmax.io
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/part-of: approval
+webhooks:
+  - admissionReviewVersions:
+      - v1beta1
+      - v1
+    clientConfig:
+      service:
+        name: approval-operator
+        namespace: hypercloud4-system
+        port: 443
+        path: /mutate-approvals
+    failurePolicy: Fail
+    sideEffects: None
+    name: mutating.approval.tmax.io
+    rules:
+      - apiGroups:
+          - tmax.io
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - approvals/*
+        scope: '*'

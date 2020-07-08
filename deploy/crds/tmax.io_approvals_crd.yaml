@@ -70,7 +70,6 @@ spec:
                     userId:
                       type: string
                   required:
-                  - approvedTime
                   - decision
                   - userId
                   type: object

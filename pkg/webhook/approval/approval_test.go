@@ -29,8 +29,8 @@ func TestCreateCert(t *testing.T) {
 		t.Fatal(err, "error getting namespace")
 	}
 
-	// Dummy  validatingwebhookconfigurations
-	conf := &admissionRegistrationV1.ValidatingWebhookConfiguration{
+	// Dummy  ebhookconfigurations
+	valConf := &admissionRegistrationV1.ValidatingWebhookConfiguration{
 		ObjectMeta: metav1.ObjectMeta{Name: ValidationConfigName},
 		Webhooks: []admissionRegistrationV1.ValidatingWebhook{
 			{
@@ -44,11 +44,26 @@ func TestCreateCert(t *testing.T) {
 			},
 		},
 	}
+	mutConf := &admissionRegistrationV1.MutatingWebhookConfiguration{
+		ObjectMeta: metav1.ObjectMeta{Name: MutationConfigName},
+		Webhooks: []admissionRegistrationV1.MutatingWebhook{
+			{
+				Name: "mutating.approval.tmax.io",
+				ClientConfig: admissionRegistrationV1.WebhookClientConfig{
+					Service: &admissionRegistrationV1.ServiceReference{
+						Name:      svcName,
+						Namespace: ns,
+					},
+				},
+			},
+		},
+	}
 
 	// Fake client
 	s := scheme.Scheme
-	s.AddKnownTypes(admissionRegistrationV1.SchemeGroupVersion, conf)
-	client := fake.NewFakeClientWithScheme(s, []runtime.Object{conf}...)
+	s.AddKnownTypes(admissionRegistrationV1.SchemeGroupVersion, valConf)
+	s.AddKnownTypes(admissionRegistrationV1.SchemeGroupVersion, mutConf)
+	client := fake.NewFakeClientWithScheme(s, []runtime.Object{valConf, mutConf}...)
 
 	// Create cert
 	if err := CreateCert(context.TODO(), client); err != nil {
