@@ -12,7 +12,7 @@ webhooks:
     - v1
     clientConfig:
       service:
-        name: approval-webhook
+        name: approval-operator
         namespace: hypercloud4-system
         port: 443
         path: /validate-approvals

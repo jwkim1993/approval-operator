@@ -46,7 +46,7 @@ func LocalIP() (string, error) {
 func WebhookServiceName() string {
 	svcName := os.Getenv("WEBHOOK_SERVICE_NAME")
 	if svcName == "" {
-		svcName = "approval-webhook"
+		svcName = "approval-operator"
 	}
 	return svcName
 }
