@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: approval-webhook
+  name: approval-operator
   namespace: hypercloud4-system
 spec:
   selector:
@@ -9,3 +9,7 @@ spec:
   ports:
   - port: 443
     targetPort: 9443
+    name: approval-webhook
+  - port: 8081
+    targetPort: 8081
+    name: approval-controller
