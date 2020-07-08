@@ -23,7 +23,7 @@ const (
 	RejectedMessage string = "Reject accepted. Exit the server."
 	UnknownMessage  string = "Decision Unknown: "
 
-	OperatorSvcAddr string = "approval-operator.hypercloud4-system.svc.cluster.local/approval/"
+	OperatorSvcAddr string = "http://approval-operator.hypercloud4-system.svc.cluster.local:8081/approval"
 
 	ConfigMapPath    string = "/tmp/config/users"
 	AccessPath       string = "/"
@@ -80,7 +80,7 @@ func Users() (map[string]string, error) {
 	}
 	defer file.Close()
 
-	var users map[string]string
+	users := make(map[string]string)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		user := strings.Split(scanner.Text(), "=")
